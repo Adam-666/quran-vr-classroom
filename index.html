@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حصة القرآن الكريم — المسجد الافتراضي</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dark: #8A6B28;
+    --deep: #0D1B2A;
+    --deep2: #132238;
+    --green: #1B4332;
+    --green-light: #2D6A4F;
+    --cream: #F5F0E8;
+    --text: #F0E6D0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── LOBBY (waiting screen) ─── */
+  #lobby {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(27,67,50,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.15) 0%, transparent 50%),
+      var(--deep);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Islamic pattern overlay */
+  #lobby::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(201,168,76,0.03) 0px, rgba(201,168,76,0.03) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(-45deg, rgba(201,168,76,0.03) 0px, rgba(201,168,76,0.03) 1px, transparent 1px, transparent 40px);
+    pointer-events: none;
+  }
+
+  .logo-area {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .mosque-icon {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%,100% { filter: drop-shadow(0 0 20px rgba(201,168,76,0.3)); }
+    50% { filter: drop-shadow(0 0 35px rgba(201,168,76,0.7)); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .platform-name {
+    font-family: 'Amiri', serif;
+    font-size: 2.2rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-shadow: 0 0 30px rgba(201,168,76,0.5);
+  }
+
+  .platform-sub {
+    font-size: 0.95rem;
+    color: rgba(240,230,208,0.6);
+    margin-top: 0.3rem;
+    letter-spacing: 1px;
+  }
+
+  /* Card */
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    animation: fadeUp 0.8s 0.2s ease both;
+    backdrop-filter: blur(10px);
+  }
+
+  .card h2 {
+    font-family: 'Amiri', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 1.8rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  /* Form */
+  .field {
+    margin-bottom: 1.2rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.85rem;
+    color: rgba(240,230,208,0.7);
+    margin-bottom: 0.4rem;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  .field select option { background: var(--deep2); color: var(--text); }
+
+  /* Role pills */
+  .role-group {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .role-pill {
+    flex: 1;
+    padding: 0.65rem;
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(240,230,208,0.7);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .role-pill.active {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* Enter button */
+  .btn-enter {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    border: none;
+    border-radius: 12px;
+    color: var(--deep);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+    margin-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-enter::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.4s;
+  }
+
+  .btn-enter:hover::before { left: 100%; }
+  .btn-enter:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201,168,76,0.4); }
+  .btn-enter:active { transform: translateY(0); }
+
+  /* Info chips */
+  .info-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .chip {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 50px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8rem;
+    color: rgba(240,230,208,0.55);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* ─── CLASSROOM ─── */
+  #classroom {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+    background: var(--deep);
+  }
+
+  /* Top bar */
+  #topbar {
+    background: rgba(13,27,42,0.95);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-shrink: 0;
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Amiri', serif;
+    color: var(--gold);
+    font-size: 1.1rem;
+  }
+
+  .topbar-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(240,230,208,0.7);
+  }
+
+  .badge {
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 20px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.78rem;
+    color: var(--gold);
+  }
+
+  .btn-leave {
+    background: rgba(220,50,50,0.15);
+    border: 1px solid rgba(220,50,50,0.3);
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    color: #ff6b6b;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-leave:hover { background: rgba(220,50,50,0.3); }
+
+  /* Main area: VR + Video side by side */
+  #main-area {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* VR container */
+  #vr-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #vr-container a-scene {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* VR controls overlay */
+  #vr-controls {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(13,27,42,0.85);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+
+  .ctrl-btn {
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    color: rgba(240,230,208,0.8);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .ctrl-btn:hover { background: rgba(201,168,76,0.2); color: var(--gold); }
+
+  /* Video sidebar */
+  #video-sidebar {
+    width: 260px;
+    background: rgba(13,27,42,0.97);
+    border-right: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-title {
+    padding: 0.8rem 1rem;
+    font-size: 0.82rem;
+    color: rgba(240,230,208,0.5);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  /* Jitsi iframe */
+  #jitsi-frame {
+    flex: 1;
+    width: 100%;
+    border: none;
+  }
+
+  /* Panel toggle button (mobile) */
+  #toggle-video-btn {
+    display: none;
+    position: fixed;
+    bottom: 5rem;
+    left: 1rem;
+    background: var(--gold-dark);
+    border: none;
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    color: white;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    z-index: 200;
+  }
+
+  /* Instructions panel (for teacher) */
+  #teacher-panel {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(13,27,42,0.9);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    max-width: 200px;
+    font-size: 0.8rem;
+    color: rgba(240,230,208,0.7);
+    z-index: 10;
+    backdrop-filter: blur(8px);
+    display: none;
+  }
+
+  #teacher-panel h4 {
+    color: var(--gold);
+    font-family: 'Amiri', serif;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  #teacher-panel ul {
+    list-style: none;
+    line-height: 2;
+  }
+
+  #teacher-panel ul li::before {
+    content: '← ';
+    color: var(--gold);
+    font-size: 0.7rem;
+  }
+
+  /* ─── Loading overlay ─── */
+  #loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--deep);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.8s;
+  }
+
+  .loading-mosque { font-size: 4rem; animation: pulse 1.5s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.8; }
+  }
+
+  .loading-text {
+    margin-top: 1.2rem;
+    font-family: 'Amiri', serif;
+    font-size: 1.3rem;
+    color: var(--gold);
+  }
+
+  .loading-sub {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    color: rgba(240,230,208,0.4);
+  }
+
+  .progress-bar {
+    width: 200px;
+    height: 3px;
+    background: rgba(201,168,76,0.15);
+    border-radius: 3px;
+    margin-top: 1.5rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 3px;
+    animation: load 3s ease forwards;
+  }
+
+  @keyframes load {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    #video-sidebar { display: none; }
+    #toggle-video-btn { display: block; }
+    #video-sidebar.show { display: flex; position: fixed; inset: 0; z-index: 500; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     LOADING OVERLAY
+══════════════════════════════════ -->
+<div id="loading-overlay">
+  <div class="loading-mosque">🕌</div>
+  <div class="loading-text">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+  <div class="loading-sub">جاري تحميل المسجد الافتراضي...</div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+</div>
+
+<!-- ══════════════════════════════════
+     LOBBY
+══════════════════════════════════ -->
+<div id="lobby">
+  <div class="logo-area">
+    <span class="mosque-icon">🕌</span>
+    <div class="platform-name">منصة القرآن الكريم</div>
+    <div class="platform-sub">حصص تفاعلية في المسجد الافتراضي</div>
+  </div>
+
+  <div class="card">
+    <h2>⬤ الدخول للحصة</h2>
+
+    <div class="field">
+      <label>اسمك الكريم</label>
+      <input type="text" id="user-name" placeholder="أدخل اسمك..." maxlength="40" />
+    </div>
+
+    <div class="field">
+      <label>رقم الحصة / الغرفة</label>
+      <input type="text" id="room-id" placeholder="مثال: quran-room-1" />
+    </div>
+
+    <div class="field">
+      <label>صفتك</label>
+      <div class="role-group">
+        <button class="role-pill active" onclick="setRole('student', this)">🎓 طالب</button>
+        <button class="role-pill" onclick="setRole('teacher', this)">📖 معلم</button>
+      </div>
+    </div>
+
+    <button class="btn-enter" onclick="enterClassroom()">
+      ادخل الحصة ←
+    </button>
+  </div>
+
+  <div class="info-chips">
+    <span class="chip">🎙️ صوت مكاني</span>
+    <span class="chip">🕌 مسجد ثلاثي الأبعاد</span>
+    <span class="chip">📋 لوحات تعليمية</span>
+    <span class="chip">🌐 بدون تثبيت</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     CLASSROOM
+══════════════════════════════════ -->
+<div id="classroom">
+
+  <!-- Top Bar -->
+  <div id="topbar">
+    <div class="topbar-brand">🕌 المسجد الافتراضي</div>
+    <div class="topbar-info">
+      <span id="topbar-name" class="badge">—</span>
+      <span id="topbar-room" style="color:rgba(240,230,208,0.4); font-size:0.8rem;">—</span>
+    </div>
+    <button class="btn-leave" onclick="leaveClassroom()">مغادرة ✕</button>
+  </div>
+
+  <!-- Main -->
+  <div id="main-area">
+
+    <!-- VR Scene -->
+    <div id="vr-container">
+
+      <a-scene
+        id="vr-scene"
+        embedded
+        renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
+        fog="type: exponential; color: #1a2a1a; density: 0.015"
+        loading-screen="dotsColor: #C9A84C; backgroundColor: #0D1B2A">
+
+        <a-assets>
+          <!-- Sky texture (gradient) -->
+        </a-assets>
+
+        <!-- ─── SKY ─── -->
+        <a-sky color="#0D1B2A"></a-sky>
+
+        <!-- ─── AMBIENT + LIGHTS ─── -->
+        <a-light type="ambient" color="#2a3a2a" intensity="0.6"></a-light>
+        <a-light type="directional" color="#C9A84C" intensity="0.8"
+          position="0 10 -5" castShadow="true"></a-light>
+        <!-- Chandeliers warm glow -->
+        <a-light type="point" color="#FFD700" intensity="1.2" position="0 5 0" distance="20"></a-light>
+        <a-light type="point" color="#FFD700" intensity="0.6" position="8 4 0" distance="12"></a-light>
+        <a-light type="point" color="#FFD700" intensity="0.6" position="-8 4 0" distance="12"></a-light>
+
+        <!-- ─── FLOOR (marble pattern) ─── -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="30" height="30"
+          color="#E8E0D0" roughness="0.2" metalness="0.1"
+          shadow="receive: true">
+        </a-plane>
+
+        <!-- Floor marble grid lines -->
+        <a-entity position="0 0.01 0" rotation="-90 0 0">
+          <a-plane width="30" height="0.05" color="#C9A84C" opacity="0.3" position="0 -3 0"></a-plane>
+          <a-plane width="30" height="0.05" color="#C9A84C" opacity="0.3" position="0 0 0"></a-plane>
+          <a-plane width="30" height="0.05" color="#C9A84C" opacity="0.3" position="0 3 0"></a-plane>
+          <a-plane width="0.05" height="30" color="#C9A84C" opacity="0.3" position="-3 0 0"></a-plane>
+          <a-plane width="0.05" height="30" color="#C9A84C" opacity="0.3" position="0 0 0"></a-plane>
+          <a-plane width="0.05" height="30" color="#C9A84C" opacity="0.3" position="3 0 0"></a-plane>
+        </a-entity>
+
+        <!-- ─── WALLS ─── -->
+        <!-- Back wall -->
+        <a-box position="0 5 -14" width="30" height="10" depth="0.3"
+          color="#2D4A2D" roughness="0.8"></a-box>
+        <!-- Front wall -->
+        <a-box position="0 5 14" width="30" height="10" depth="0.3"
+          color="#2D4A2D" roughness="0.8"></a-box>
+        <!-- Left wall -->
+        <a-box position="-14 5 0" width="0.3" height="10" depth="28"
+          color="#2D4A2D" roughness="0.8"></a-box>
+        <!-- Right wall -->
+        <a-box position="14 5 0" width="0.3" height="10" depth="28"
+          color="#2D4A2D" roughness="0.8"></a-box>
+
+        <!-- ─── CEILING ─── -->
+        <a-plane position="0 10 0" rotation="90 0 0" width="30" height="30"
+          color="#1B3A1B" roughness="0.9"></a-plane>
+
+        <!-- ─── MAIN DOME ─── -->
+        <a-sphere position="0 11 0" radius="5" segments-height="18" segments-width="36"
+          color="#1B4332" roughness="0.7" metalness="0.1"
+          side="back"></a-sphere>
+
+        <!-- Dome inner glow ring -->
+        <a-torus position="0 8 0" radius="3" radius-tubular="0.05"
+          color="#C9A84C" opacity="0.6"
+          rotation="0 0 0"></a-torus>
+
+        <!-- ─── CHANDELIER ─── -->
+        <a-entity position="0 8.5 0">
+          <!-- Main ring -->
+          <a-torus radius="1.2" radius-tubular="0.04" color="#C9A84C" metalness="0.8"></a-torus>
+          <!-- Center drop -->
+          <a-cylinder position="0 0 0" height="0.8" radius="0.06"
+            color="#C9A84C" metalness="0.8"></a-cylinder>
+          <!-- Lights around ring -->
+          <a-sphere position="1.2 -0.1 0" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
+          <a-sphere position="-1.2 -0.1 0" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
+          <a-sphere position="0 -0.1 1.2" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
+          <a-sphere position="0 -0.1 -1.2" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
+          <!-- Hanging chains -->
+          <a-cylinder position="0 1.5 0" height="3" radius="0.01"
+            color="#A08040" metalness="0.9"></a-cylinder>
+        </a-entity>
+
+        <!-- ─── PILLARS (4 main pillars) ─── -->
+        <a-cylinder position="5 4 5"   radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
+        <a-cylinder position="-5 4 5"  radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
+        <a-cylinder position="5 4 -5"  radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
+        <a-cylinder position="-5 4 -5" radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
+
+        <!-- Pillar caps (gold bands) -->
+        <a-torus position="5 7.8 5"   radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
+        <a-torus position="-5 7.8 5"  radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
+        <a-torus position="5 7.8 -5"  radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
+        <a-torus position="-5 7.8 -5" radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
+
+        <!-- ─── MIHRAB (prayer niche) ─── -->
+        <a-entity position="0 0 -13.5">
+          <!-- Arch back -->
+          <a-box position="0 3 0" width="3" height="6" depth="0.5"
+            color="#1B3A2A" roughness="0.7"></a-box>
+          <!-- Arch frame -->
+          <a-torus position="0 5 0.3" radius="1.4" radius-tubular="0.12"
+            color="#C9A84C" metalness="0.5"
+            rotation="0 0 0" arc="180"></a-torus>
+          <!-- Mihrab interior -->
+          <a-box position="0 3 -0.1" width="2.4" height="5" depth="0.2"
+            color="#2D5A3D" roughness="0.5"></a-box>
+          <!-- Gold decoration lines -->
+          <a-box position="0 5.5 0.35" width="3" height="0.08" depth="0.1" color="#C9A84C" metalness="0.7"></a-box>
+          <a-box position="0 0.5 0.35" width="3" height="0.08" depth="0.1" color="#C9A84C" metalness="0.7"></a-box>
+        </a-entity>
+
+        <!-- ─── MINBAR (pulpit) ─── -->
+        <a-entity position="2.5 0 -12">
+          <!-- Steps -->
+          <a-box position="0 0.2 0"   width="1.2" height="0.4" depth="0.8" color="#8B7355" roughness="0.8"></a-box>
+          <a-box position="0 0.6 -0.3" width="1.2" height="0.4" depth="0.6" color="#7A6545" roughness="0.8"></a-box>
+          <a-box position="0 1.0 -0.5" width="1.2" height="0.4" depth="0.4" color="#6B5535" roughness="0.8"></a-box>
+          <!-- Seat top -->
+          <a-box position="0 1.4 -0.6" width="1.3" height="0.12" depth="0.9" color="#C9A84C" metalness="0.3"></a-box>
+          <!-- Back rail -->
+          <a-box position="0 2.2 -1.0" width="1.2" height="1.6" depth="0.1" color="#5A4525"></a-box>
+        </a-entity>
+
+        <!-- ─── PRAYER CARPETS ─── -->
+        <!-- Main carpet strip -->
+        <a-plane position="0 0.01 0" rotation="-90 0 0" width="18" height="8"
+          color="#8B1A1A" roughness="1.0" opacity="0.85"></a-plane>
+        <!-- Carpet border -->
+        <a-plane position="0 0.011 0" rotation="-90 0 0" width="18.3" height="8.3"
+          color="#C9A84C" roughness="1.0" opacity="0.4"></a-plane>
+
+        <!-- Prayer rows (carpet lines) -->
+        <a-plane position="0 0.012 -3" rotation="-90 0 0" width="18" height="0.05"
+          color="#C9A84C" opacity="0.5"></a-plane>
+        <a-plane position="0 0.012 0"  rotation="-90 0 0" width="18" height="0.05"
+          color="#C9A84C" opacity="0.5"></a-plane>
+        <a-plane position="0 0.012 3"  rotation="-90 0 0" width="18" height="0.05"
+          color="#C9A84C" opacity="0.5"></a-plane>
+
+        <!-- ─── TEACHING BOARDS (3 boards) ─── -->
+
+        <!-- Board 1: Qibla direction sign -->
+        <a-entity position="-12 4 -5">
+          <a-box width="4" height="2.5" depth="0.12" color="#1B3A2A" roughness="0.5"></a-box>
+          <a-box width="4.15" height="2.65" depth="0.08" color="#C9A84C" metalness="0.4" position="0 0 -0.05"></a-box>
+          <a-text value="اتجاه القبلة" align="center" color="#FFD700"
+            font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"
+            width="3.5" position="0 0.5 0.1"></a-text>
+          <a-text value="الكعبة المشرفة ←" align="center" color="#E8E0D0"
+            width="3" position="0 -0.1 0.1"></a-text>
+          <a-light type="point" color="#FFD700" intensity="0.5" position="0 1.5 1" distance="4"></a-light>
+        </a-entity>
+
+        <!-- Board 2: Today's lesson (right wall) -->
+        <a-entity position="12 4 0" rotation="0 -90 0">
+          <a-box width="5" height="3" depth="0.12" color="#0D2B1A" roughness="0.5"></a-box>
+          <a-box width="5.15" height="3.15" depth="0.08" color="#C9A84C" metalness="0.4" position="0 0 -0.05"></a-box>
+          <a-text value="درس اليوم" align="center" color="#FFD700"
+            width="4" position="0 0.9 0.1"></a-text>
+          <a-text value="سورة الفاتحة" align="center" color="#E8E0D0"
+            width="4" position="0 0.2 0.1"></a-text>
+          <a-text value="أحكام التجويد" align="center" color="#C9A84C"
+            width="3.5" position="0 -0.4 0.1"></a-text>
+          <a-text value="الاستاذ: —" align="center" color="rgba(240,230,208,0.6)"
+            width="3" position="0 -1.0 0.1" id="teacher-board-text"></a-text>
+        </a-entity>
+
+        <!-- Board 3: Rules board (back wall) -->
+        <a-entity position="0 4 13.5" rotation="0 180 0">
+          <a-box width="6" height="3.5" depth="0.12" color="#1B3A2A" roughness="0.5"></a-box>
+          <a-box width="6.15" height="3.65" depth="0.08" color="#C9A84C" metalness="0.4" position="0 0 -0.05"></a-box>
+          <a-text value="آداب طالب القرآن" align="center" color="#FFD700"
+            width="5" position="0 1.2 0.1"></a-text>
+          <a-text value="الإنصات والاحترام" align="center" color="#E8E0D0"
+            width="4.5" position="0 0.5 0.1"></a-text>
+          <a-text value="الطهارة والوضوء" align="center" color="#E8E0D0"
+            width="4.5" position="0 -0.1 0.1"></a-text>
+          <a-text value="الإخلاص لله تعالى" align="center" color="#E8E0D0"
+            width="4.5" position="0 -0.7 0.1"></a-text>
+        </a-entity>
+
+        <!-- ─── WINDOWS (arched) ─── -->
+        <!-- Left wall windows -->
+        <a-entity position="-13.8 5 -6">
+          <a-box width="0.2" height="3" depth="1.5" color="#1B3A1B" roughness="0.8"></a-box>
+          <a-plane rotation="0 90 0" width="1.5" height="2.5" color="#87CEEB" opacity="0.2" position="0.12 0 0"></a-plane>
+          <a-light type="point" color="#87CEEB" intensity="0.3" position="0.5 0 0" distance="5"></a-light>
+        </a-entity>
+        <a-entity position="-13.8 5 6">
+          <a-box width="0.2" height="3" depth="1.5" color="#1B3A1B" roughness="0.8"></a-box>
+          <a-plane rotation="0 90 0" width="1.5" height="2.5" color="#87CEEB" opacity="0.2" position="0.12 0 0"></a-plane>
+        </a-entity>
+
+        <!-- ─── CAMERA + PLAYER ─── -->
+        <a-entity id="player"
+          position="0 1.6 5"
+          wasd-controls="acceleration: 15"
+          look-controls="pointerLockEnabled: false">
+          <a-camera
+            near="0.1" far="500"
+            fov="70">
+          </a-camera>
+        </a-entity>
+
+      </a-scene>
+
+      <!-- VR Controls bar -->
+      <div id="vr-controls">
+        <button class="ctrl-btn" onclick="moveToMihrab()">🕌 الاقتراب من المحراب</button>
+        <button class="ctrl-btn" onclick="moveToCenter()">↩ العودة للمنتصف</button>
+        <button class="ctrl-btn" onclick="toggleFullVR()">⛶ ملء الشاشة</button>
+      </div>
+
+      <!-- Teacher panel -->
+      <div id="teacher-panel">
+        <h4>🎓 لوحة المعلم</h4>
+        <ul>
+          <li>W A S D للتحرك</li>
+          <li>الفأرة للنظر</li>
+          <li>اضغط F للملء</li>
+        </ul>
+      </div>
+
+    </div><!-- /vr-container -->
+
+    <!-- Video Sidebar (Jitsi) -->
+    <div id="video-sidebar">
+      <div class="sidebar-title">🎙️ الاتصال المباشر</div>
+      <iframe id="jitsi-frame" allow="camera; microphone; fullscreen; display-capture"></iframe>
+    </div>
+
+  </div><!-- /main-area -->
+
+  <button id="toggle-video-btn" onclick="toggleVideoPanel()">🎥 الفيديو</button>
+
+</div><!-- /classroom -->
+
+<script>
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let currentRole = 'student';
+let userName = '';
+let roomId = '';
+
+// ══════════════════════════════════
+// LOBBY FUNCTIONS
+// ══════════════════════════════════
+function setRole(role, btn) {
+  currentRole = role;
+  document.querySelectorAll('.role-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function enterClassroom() {
+  userName = document.getElementById('user-name').value.trim();
+  roomId = document.getElementById('room-id').value.trim();
+
+  if (!userName) {
+    document.getElementById('user-name').focus();
+    document.getElementById('user-name').style.borderColor = '#ff6b6b';
+    return;
+  }
+  if (!roomId) {
+    document.getElementById('room-id').focus();
+    document.getElementById('room-id').style.borderColor = '#ff6b6b';
+    return;
+  }
+
+  // Show loading
+  document.getElementById('loading-overlay').style.display = 'flex';
+  document.getElementById('loading-overlay').style.opacity = '1';
+
+  // Simulate loading + switch to classroom
+  setTimeout(() => {
+    document.getElementById('loading-overlay').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('lobby').style.display = 'none';
+      document.getElementById('classroom').style.display = 'flex';
+
+      // Update topbar
+      document.getElementById('topbar-name').textContent =
+        (currentRole === 'teacher' ? '📖 ' : '🎓 ') + userName;
+      document.getElementById('topbar-room').textContent = 'غرفة: ' + roomId;
+
+      // Show teacher panel
+      if (currentRole === 'teacher') {
+        document.getElementById('teacher-panel').style.display = 'block';
+        document.getElementById('teacher-board-text').setAttribute('value', 'الأستاذ: ' + userName);
+      }
+
+      // Load Jitsi
+      loadJitsi();
+
+    }, 600);
+  }, 3000);
+}
+
+function loadJitsi() {
+  // Clean room ID for Jitsi (no spaces)
+  const jitsiRoom = 'quran-' + roomId.replace(/[^a-zA-Z0-9-]/g, '-');
+  const displayName = encodeURIComponent(userName);
+
+  // Build Jitsi URL with config
+  const jitsiUrl = `https://meet.jit.si/${jitsiRoom}`
+    + `#userInfo.displayName="${displayName}"`
+    + `&config.startWithVideoMuted=false`
+    + `&config.startWithAudioMuted=false`
+    + `&config.prejoinPageEnabled=false`
+    + `&config.disableDeepLinking=true`
+    + `&interfaceConfig.SHOW_JITSI_WATERMARK=false`
+    + `&interfaceConfig.SHOW_BRAND_WATERMARK=false`
+    + `&interfaceConfig.DEFAULT_REMOTE_DISPLAY_NAME="${displayName}"`;
+
+  document.getElementById('jitsi-frame').src = jitsiUrl;
+}
+
+function leaveClassroom() {
+  if (confirm('هل تريد مغادرة الحصة؟')) {
+    document.getElementById('jitsi-frame').src = '';
+    document.getElementById('classroom').style.display = 'none';
+    document.getElementById('lobby').style.display = 'flex';
+    // Reset form
+    document.getElementById('user-name').style.borderColor = '';
+    document.getElementById('room-id').style.borderColor = '';
+  }
+}
+
+// ══════════════════════════════════
+// VR CONTROLS
+// ══════════════════════════════════
+function moveToMihrab() {
+  const player = document.getElementById('player');
+  player.setAttribute('position', '0 1.6 -8');
+  player.setAttribute('rotation', '0 180 0');
+}
+
+function moveToCenter() {
+  const player = document.getElementById('player');
+  player.setAttribute('position', '0 1.6 5');
+  player.setAttribute('rotation', '0 180 0');
+}
+
+function toggleFullVR() {
+  const vrContainer = document.getElementById('vr-container');
+  if (!document.fullscreenElement) {
+    vrContainer.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function toggleVideoPanel() {
+  document.getElementById('video-sidebar').classList.toggle('show');
+}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+window.addEventListener('load', () => {
+  // Hide loading after fonts load
+  setTimeout(() => {
+    document.getElementById('loading-overlay').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('loading-overlay').style.display = 'none';
+    }, 800);
+  }, 2000);
+});
+</script>
+
+</body>
+</html>
