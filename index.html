@@ -3,944 +3,524 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>حصة القرآن الكريم — المسجد الافتراضي</title>
+<title>منصة القرآن الكريم | Quran Learning Platform</title>
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --gold: #C9A84C;
-    --gold-light: #E8C96A;
-    --gold-dark: #8A6B28;
-    --deep: #0D1B2A;
-    --deep2: #132238;
-    --green: #1B4332;
-    --green-light: #2D6A4F;
-    --cream: #F5F0E8;
-    --text: #F0E6D0;
-  }
+:root{--gold:#C9A84C;--gold-d:#8A6B28;--deep:#0D1B2A;--text:#F0E6D0;--red:#ff6b6b;--ok:#4ade80}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--deep);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+#lang-btn{position:fixed;top:1rem;left:1rem;z-index:9999;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.35);border-radius:20px;padding:0.3rem 0.9rem;color:var(--gold);font-family:'Tajawal',sans-serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(8px)}
+#lang-btn:hover{background:rgba(201,168,76,0.3)}
 
-  body {
-    background: var(--deep);
-    color: var(--text);
-    font-family: 'Tajawal', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* LOBBY */
+#lobby{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 20% 50%,rgba(27,67,50,0.4) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,168,76,0.15) 0%,transparent 50%),var(--deep);padding:2rem;position:relative;overflow:hidden}
+#lobby::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(45deg,rgba(201,168,76,0.03) 0px,rgba(201,168,76,0.03) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(-45deg,rgba(201,168,76,0.03) 0px,rgba(201,168,76,0.03) 1px,transparent 1px,transparent 40px)}
+.logo-area{text-align:center;margin-bottom:2rem;animation:fadeDown 0.8s ease both}
+.mosque-icon{font-size:4.5rem;display:block;margin-bottom:0.4rem;animation:glow 3s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 18px rgba(201,168,76,0.3))}50%{filter:drop-shadow(0 0 32px rgba(201,168,76,0.7))}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.platform-name{font-family:'Amiri',serif;font-size:2rem;color:var(--gold);letter-spacing:2px;text-shadow:0 0 28px rgba(201,168,76,0.5)}
+.platform-sub{font-size:0.9rem;color:rgba(240,230,208,0.55);margin-top:0.3rem}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);border-radius:20px;padding:2rem;width:100%;max-width:480px;animation:fadeUp 0.8s 0.2s ease both;backdrop-filter:blur(10px)}
+.card h2{font-family:'Amiri',serif;font-size:1.4rem;color:var(--gold);margin-bottom:1.5rem;text-align:center}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:0.83rem;color:rgba(240,230,208,0.65);margin-bottom:0.35rem}
+.field input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.22);border-radius:10px;padding:0.7rem 1rem;color:var(--text);font-family:'Tajawal',sans-serif;font-size:0.95rem;transition:all 0.2s;outline:none}
+.field input:focus{border-color:var(--gold);background:rgba(201,168,76,0.07)}
+.field input.err{border-color:var(--red)}
+.err-msg{color:var(--red);font-size:0.78rem;margin-top:0.3rem;display:none}
+.role-group{display:flex;gap:0.7rem;margin-bottom:1.2rem}
+.role-pill{flex:1;padding:0.6rem;border:1px solid rgba(201,168,76,0.22);border-radius:10px;background:transparent;color:rgba(240,230,208,0.65);font-family:'Tajawal',sans-serif;font-size:0.9rem;cursor:pointer;transition:all 0.2s;text-align:center}
+.role-pill.active{border-color:var(--gold);background:rgba(201,168,76,0.14);color:var(--gold);font-weight:600}
+#teacher-fields{display:none;margin-bottom:1rem}
+.teacher-note{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:0.8rem 1rem;font-size:0.83rem;color:rgba(240,230,208,0.7);line-height:1.8;margin-bottom:1rem}
+.teacher-note b{color:var(--gold)}
+.btn-enter{width:100%;padding:0.95rem;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:none;border-radius:12px;color:var(--deep);font-family:'Tajawal',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all 0.3s;letter-spacing:1px;margin-top:0.4rem;position:relative;overflow:hidden}
+.btn-enter::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.4s}
+.btn-enter:hover::before{left:100%}
+.btn-enter:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.4)}
+.chips{display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;margin-top:1.3rem;animation:fadeUp 0.8s 0.4s ease both}
+.chip{background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.13);border-radius:50px;padding:0.3rem 0.8rem;font-size:0.78rem;color:rgba(240,230,208,0.5)}
 
-  /* ─── LOBBY (waiting screen) ─── */
-  #lobby {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background:
-      radial-gradient(ellipse at 20% 50%, rgba(27,67,50,0.4) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.15) 0%, transparent 50%),
-      var(--deep);
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
-  }
+/* CLASSROOM */
+#classroom{display:none;flex-direction:column;height:100vh;overflow:hidden}
+html,body{height:100%;overflow:hidden}
+#topbar{background:rgba(13,27,42,0.97);border-bottom:1px solid rgba(201,168,76,0.18);padding:0.55rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-shrink:0;z-index:100}
+.topbar-brand{display:flex;align-items:center;gap:0.5rem;font-family:'Amiri',serif;color:var(--gold);font-size:1.05rem}
+.topbar-center{display:flex;align-items:center;gap:0.5rem;flex:1;justify-content:center}
+.badge{background:rgba(201,168,76,0.14);border:1px solid rgba(201,168,76,0.28);border-radius:20px;padding:0.18rem 0.65rem;font-size:0.76rem;color:var(--gold)}
+.live-dot{width:7px;height:7px;background:var(--ok);border-radius:50%;animation:blink 1.5s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+.btn-leave{background:rgba(220,50,50,0.13);border:1px solid rgba(220,50,50,0.28);border-radius:8px;padding:0.38rem 0.85rem;color:var(--red);font-family:'Tajawal',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.2s}
+.btn-leave:hover{background:rgba(220,50,50,0.28)}
 
-  /* Islamic pattern overlay */
-  #lobby::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      repeating-linear-gradient(45deg, rgba(201,168,76,0.03) 0px, rgba(201,168,76,0.03) 1px, transparent 1px, transparent 40px),
-      repeating-linear-gradient(-45deg, rgba(201,168,76,0.03) 0px, rgba(201,168,76,0.03) 1px, transparent 1px, transparent 40px);
-    pointer-events: none;
-  }
+/* Invite bar */
+#invite-bar{background:rgba(27,67,50,0.35);border-bottom:1px solid rgba(74,222,128,0.18);padding:0.45rem 1.1rem;display:flex;align-items:center;gap:0.7rem;font-size:0.8rem;flex-shrink:0;flex-wrap:wrap}
+#invite-bar span{color:rgba(240,230,208,0.55);white-space:nowrap}
+#invite-link-box{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(74,222,128,0.2);border-radius:6px;padding:0.28rem 0.65rem;color:var(--ok);font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.inv-btn{background:rgba(74,222,128,0.13);border:1px solid rgba(74,222,128,0.28);border-radius:6px;padding:0.28rem 0.75rem;color:var(--ok);font-family:'Tajawal',sans-serif;font-size:0.78rem;cursor:pointer;white-space:nowrap;transition:all 0.2s}
+.inv-btn:hover{background:rgba(74,222,128,0.28)}
+.inv-btn.copied{background:rgba(74,222,128,0.35);color:#fff}
+.wa-btn{background:rgba(37,211,102,0.13);border:1px solid rgba(37,211,102,0.3);color:#25d366}
+.wa-btn:hover{background:rgba(37,211,102,0.28)}
 
-  .logo-area {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    animation: fadeDown 0.8s ease both;
-  }
+#main-area{display:flex;flex:1;overflow:hidden}
 
-  .mosque-icon {
-    font-size: 5rem;
-    display: block;
-    margin-bottom: 0.5rem;
-    filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
-    animation: glow 3s ease-in-out infinite;
-  }
+/* VR */
+#vr-wrap{flex:1;position:relative;overflow:hidden;min-height:0}
+#vr-wrap a-scene{position:absolute!important;top:0!important;left:0!important;width:100%!important;height:100%!important}
+#vr-wrap canvas{width:100%!important;height:100%!important}
+#vr-ctrl{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);display:flex;gap:0.45rem;flex-wrap:wrap;justify-content:center;background:rgba(13,27,42,0.88);border:1px solid rgba(201,168,76,0.18);border-radius:50px;padding:0.45rem 0.9rem;backdrop-filter:blur(10px);z-index:10}
+.cb{background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.18);border-radius:8px;padding:0.35rem 0.75rem;color:rgba(240,230,208,0.78);font-family:'Tajawal',sans-serif;font-size:0.78rem;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.cb:hover{background:rgba(201,168,76,0.2);color:var(--gold)}
+#perf-btn{position:absolute;top:0.7rem;left:0.7rem;background:rgba(13,27,42,0.85);border:1px solid rgba(201,168,76,0.18);border-radius:10px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.75rem;color:rgba(240,230,208,0.65);cursor:pointer;z-index:10;backdrop-filter:blur(8px);transition:all 0.2s}
+#perf-btn:hover{border-color:var(--gold);color:var(--gold)}
 
-  @keyframes glow {
-    0%,100% { filter: drop-shadow(0 0 20px rgba(201,168,76,0.3)); }
-    50% { filter: drop-shadow(0 0 35px rgba(201,168,76,0.7)); }
-  }
+/* Video */
+#vid-panel{width:280px;background:rgba(10,20,35,0.98);border-right:1px solid rgba(201,168,76,0.13);display:flex;flex-direction:column;flex-shrink:0}
+.vid-header{padding:0.6rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:0.45rem;font-size:0.8rem;color:rgba(240,230,208,0.55)}
+#no-link-notice{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;text-align:center;gap:0.8rem}
+#no-link-notice .nl-icon{font-size:2.5rem}
+#no-link-notice p{font-size:0.83rem;color:rgba(240,230,208,0.5);line-height:1.7}
+#no-link-notice b{color:var(--gold)}
+#meet-frame{flex:1;width:100%;border:none;display:none}
+#vid-tip{padding:0.5rem 0.7rem;background:rgba(201,168,76,0.07);border-top:1px solid rgba(201,168,76,0.1);font-size:0.73rem;color:rgba(240,230,208,0.45);text-align:center;line-height:1.6}
 
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+/* Loader */
+#loader{position:fixed;inset:0;background:var(--deep);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.8s}
+.l-icon{font-size:3.8rem;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.l-txt{margin-top:1rem;font-family:'Amiri',serif;font-size:1.25rem;color:var(--gold)}
+.l-sub{margin-top:0.35rem;font-size:0.82rem;color:rgba(240,230,208,0.38)}
+.prog{width:180px;height:3px;background:rgba(201,168,76,0.13);border-radius:3px;margin-top:1.4rem;overflow:hidden}
+.prog-f{height:100%;background:var(--gold);border-radius:3px;animation:lp 2.4s ease forwards}
+@keyframes lp{from{width:0}to{width:100%}}
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .platform-name {
-    font-family: 'Amiri', serif;
-    font-size: 2.2rem;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-shadow: 0 0 30px rgba(201,168,76,0.5);
-  }
-
-  .platform-sub {
-    font-size: 0.95rem;
-    color: rgba(240,230,208,0.6);
-    margin-top: 0.3rem;
-    letter-spacing: 1px;
-  }
-
-  /* Card */
-  .card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 20px;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 480px;
-    animation: fadeUp 0.8s 0.2s ease both;
-    backdrop-filter: blur(10px);
-  }
-
-  .card h2 {
-    font-family: 'Amiri', serif;
-    font-size: 1.5rem;
-    color: var(--gold);
-    margin-bottom: 1.8rem;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  /* Form */
-  .field {
-    margin-bottom: 1.2rem;
-  }
-
-  .field label {
-    display: block;
-    font-size: 0.85rem;
-    color: rgba(240,230,208,0.7);
-    margin-bottom: 0.4rem;
-  }
-
-  .field input, .field select {
-    width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(201,168,76,0.25);
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
-    color: var(--text);
-    font-family: 'Tajawal', sans-serif;
-    font-size: 1rem;
-    transition: border-color 0.2s, background 0.2s;
-    outline: none;
-  }
-
-  .field input:focus, .field select:focus {
-    border-color: var(--gold);
-    background: rgba(201,168,76,0.08);
-  }
-
-  .field select option { background: var(--deep2); color: var(--text); }
-
-  /* Role pills */
-  .role-group {
-    display: flex;
-    gap: 0.8rem;
-    margin-bottom: 1.4rem;
-  }
-
-  .role-pill {
-    flex: 1;
-    padding: 0.65rem;
-    border: 1px solid rgba(201,168,76,0.25);
-    border-radius: 10px;
-    background: transparent;
-    color: rgba(240,230,208,0.7);
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-  }
-
-  .role-pill.active {
-    border-color: var(--gold);
-    background: rgba(201,168,76,0.15);
-    color: var(--gold);
-    font-weight: 500;
-  }
-
-  /* Enter button */
-  .btn-enter {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
-    border: none;
-    border-radius: 12px;
-    color: var(--deep);
-    font-family: 'Tajawal', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    letter-spacing: 1px;
-    margin-top: 0.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-enter::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.4s;
-  }
-
-  .btn-enter:hover::before { left: 100%; }
-  .btn-enter:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201,168,76,0.4); }
-  .btn-enter:active { transform: translateY(0); }
-
-  /* Info chips */
-  .info-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-top: 1.5rem;
-    animation: fadeUp 0.8s 0.4s ease both;
-  }
-
-  .chip {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(201,168,76,0.15);
-    border-radius: 50px;
-    padding: 0.35rem 0.9rem;
-    font-size: 0.8rem;
-    color: rgba(240,230,208,0.55);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  /* ─── CLASSROOM ─── */
-  #classroom {
-    display: none;
-    flex-direction: column;
-    height: 100vh;
-    background: var(--deep);
-  }
-
-  /* Top bar */
-  #topbar {
-    background: rgba(13,27,42,0.95);
-    border-bottom: 1px solid rgba(201,168,76,0.2);
-    padding: 0.6rem 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-shrink: 0;
-    backdrop-filter: blur(10px);
-    z-index: 100;
-  }
-
-  .topbar-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Amiri', serif;
-    color: var(--gold);
-    font-size: 1.1rem;
-  }
-
-  .topbar-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: rgba(240,230,208,0.7);
-  }
-
-  .badge {
-    background: rgba(201,168,76,0.15);
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 20px;
-    padding: 0.2rem 0.7rem;
-    font-size: 0.78rem;
-    color: var(--gold);
-  }
-
-  .btn-leave {
-    background: rgba(220,50,50,0.15);
-    border: 1px solid rgba(220,50,50,0.3);
-    border-radius: 8px;
-    padding: 0.4rem 0.9rem;
-    color: #ff6b6b;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-leave:hover { background: rgba(220,50,50,0.3); }
-
-  /* Main area: VR + Video side by side */
-  #main-area {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-    gap: 0;
-  }
-
-  /* VR container */
-  #vr-container {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #vr-container a-scene {
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  /* VR controls overlay */
-  #vr-controls {
-    position: absolute;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 0.5rem;
-    background: rgba(13,27,42,0.85);
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 50px;
-    padding: 0.5rem 1rem;
-    backdrop-filter: blur(10px);
-    z-index: 10;
-  }
-
-  .ctrl-btn {
-    background: rgba(201,168,76,0.1);
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 8px;
-    padding: 0.4rem 0.8rem;
-    color: rgba(240,230,208,0.8);
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .ctrl-btn:hover { background: rgba(201,168,76,0.2); color: var(--gold); }
-
-  /* Video sidebar */
-  #video-sidebar {
-    width: 260px;
-    background: rgba(13,27,42,0.97);
-    border-right: 1px solid rgba(201,168,76,0.15);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow: hidden;
-  }
-
-  .sidebar-title {
-    padding: 0.8rem 1rem;
-    font-size: 0.82rem;
-    color: rgba(240,230,208,0.5);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    text-align: center;
-    letter-spacing: 1px;
-  }
-
-  /* Jitsi iframe */
-  #jitsi-frame {
-    flex: 1;
-    width: 100%;
-    border: none;
-  }
-
-  /* Panel toggle button (mobile) */
-  #toggle-video-btn {
-    display: none;
-    position: fixed;
-    bottom: 5rem;
-    left: 1rem;
-    background: var(--gold-dark);
-    border: none;
-    border-radius: 50px;
-    padding: 0.5rem 1rem;
-    color: white;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.85rem;
-    cursor: pointer;
-    z-index: 200;
-  }
-
-  /* Instructions panel (for teacher) */
-  #teacher-panel {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(13,27,42,0.9);
-    border: 1px solid rgba(201,168,76,0.25);
-    border-radius: 12px;
-    padding: 0.8rem 1rem;
-    max-width: 200px;
-    font-size: 0.8rem;
-    color: rgba(240,230,208,0.7);
-    z-index: 10;
-    backdrop-filter: blur(8px);
-    display: none;
-  }
-
-  #teacher-panel h4 {
-    color: var(--gold);
-    font-family: 'Amiri', serif;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  #teacher-panel ul {
-    list-style: none;
-    line-height: 2;
-  }
-
-  #teacher-panel ul li::before {
-    content: '← ';
-    color: var(--gold);
-    font-size: 0.7rem;
-  }
-
-  /* ─── Loading overlay ─── */
-  #loading-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--deep);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    transition: opacity 0.8s;
-  }
-
-  .loading-mosque { font-size: 4rem; animation: pulse 1.5s ease-in-out infinite; }
-
-  @keyframes pulse {
-    0%,100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.08); opacity: 0.8; }
-  }
-
-  .loading-text {
-    margin-top: 1.2rem;
-    font-family: 'Amiri', serif;
-    font-size: 1.3rem;
-    color: var(--gold);
-  }
-
-  .loading-sub {
-    margin-top: 0.4rem;
-    font-size: 0.85rem;
-    color: rgba(240,230,208,0.4);
-  }
-
-  .progress-bar {
-    width: 200px;
-    height: 3px;
-    background: rgba(201,168,76,0.15);
-    border-radius: 3px;
-    margin-top: 1.5rem;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--gold);
-    border-radius: 3px;
-    animation: load 3s ease forwards;
-  }
-
-  @keyframes load {
-    from { width: 0%; }
-    to { width: 100%; }
-  }
-
-  /* Responsive */
-  @media (max-width: 700px) {
-    #video-sidebar { display: none; }
-    #toggle-video-btn { display: block; }
-    #video-sidebar.show { display: flex; position: fixed; inset: 0; z-index: 500; width: 100%; }
-  }
+#mob-vid-btn{display:none;position:fixed;bottom:5.5rem;right:1rem;background:var(--gold-d);border:none;border-radius:50px;padding:0.45rem 1rem;color:#fff;font-family:'Tajawal',sans-serif;font-size:0.82rem;cursor:pointer;z-index:200}
+@media(max-width:700px){#vid-panel{display:none}#vid-panel.show{display:flex;position:fixed;inset:0;z-index:500;width:100%}#mob-vid-btn{display:block}}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════
-     LOADING OVERLAY
-══════════════════════════════════ -->
-<div id="loading-overlay">
-  <div class="loading-mosque">🕌</div>
-  <div class="loading-text">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
-  <div class="loading-sub">جاري تحميل المسجد الافتراضي...</div>
-  <div class="progress-bar"><div class="progress-fill"></div></div>
+<button id="lang-btn" onclick="toggleLang()">EN</button>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="l-icon">🕌</div>
+  <div class="l-txt" id="l-txt">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+  <div class="l-sub" id="l-sub">جاري تهيئة المسجد الافتراضي...</div>
+  <div class="prog"><div class="prog-f"></div></div>
 </div>
 
-<!-- ══════════════════════════════════
-     LOBBY
-══════════════════════════════════ -->
+<!-- LOBBY -->
 <div id="lobby">
   <div class="logo-area">
     <span class="mosque-icon">🕌</span>
-    <div class="platform-name">منصة القرآن الكريم</div>
-    <div class="platform-sub">حصص تفاعلية في المسجد الافتراضي</div>
+    <div class="platform-name" id="p-name">منصة القرآن الكريم</div>
+    <div class="platform-sub" id="p-sub">حصص تفاعلية في المسجد الافتراضي</div>
   </div>
-
   <div class="card">
-    <h2>⬤ الدخول للحصة</h2>
-
+    <h2 id="card-title">⬤ الدخول للحصة</h2>
     <div class="field">
-      <label>اسمك الكريم</label>
-      <input type="text" id="user-name" placeholder="أدخل اسمك..." maxlength="40" />
+      <label id="lbl-name">اسمك الكريم</label>
+      <input type="text" id="inp-name" maxlength="40"/>
+      <div class="err-msg" id="err-name">يرجى إدخال اسمك</div>
     </div>
-
     <div class="field">
-      <label>رقم الحصة / الغرفة</label>
-      <input type="text" id="room-id" placeholder="مثال: quran-room-1" />
+      <label id="lbl-room">رقم الحصة</label>
+      <input type="text" id="inp-room"/>
+      <div class="err-msg" id="err-room">يرجى إدخال رقم الحصة</div>
     </div>
-
     <div class="field">
-      <label>صفتك</label>
+      <label id="lbl-role">صفتك</label>
       <div class="role-group">
-        <button class="role-pill active" onclick="setRole('student', this)">🎓 طالب</button>
-        <button class="role-pill" onclick="setRole('teacher', this)">📖 معلم</button>
+        <button class="role-pill active" onclick="setRole('student',this)">🎓 <span id="r-student">طالب</span></button>
+        <button class="role-pill"        onclick="setRole('teacher',this)">📖 <span id="r-teacher">معلم / شيخ</span></button>
       </div>
     </div>
-
-    <button class="btn-enter" onclick="enterClassroom()">
-      ادخل الحصة ←
-    </button>
+    <div id="teacher-fields">
+      <div class="teacher-note" id="teacher-note"><b>للمعلم:</b> أنشئ اجتماع Google Meet أو Zoom وأدخل رابطه أدناه. سيتمكن الطلاب من الانضمام مباشرة من داخل المسجد الافتراضي.</div>
+      <div class="field">
+        <label id="lbl-meet">رابط الاجتماع (Google Meet / Zoom...)</label>
+        <input type="url" id="inp-meet" placeholder="https://meet.google.com/xxx-xxxx-xxx"/>
+      </div>
+    </div>
+    <button class="btn-enter" id="btn-enter" onclick="enter()">ادخل الحصة ←</button>
   </div>
-
-  <div class="info-chips">
-    <span class="chip">🎙️ صوت مكاني</span>
-    <span class="chip">🕌 مسجد ثلاثي الأبعاد</span>
-    <span class="chip">📋 لوحات تعليمية</span>
-    <span class="chip">🌐 بدون تثبيت</span>
+  <div class="chips">
+    <span class="chip" id="chip1">🕌 مسجد ثلاثي الأبعاد</span>
+    <span class="chip" id="chip2">🎙️ صوت مكاني</span>
+    <span class="chip" id="chip3">📋 لوحات تعليمية</span>
+    <span class="chip" id="chip4">مجاني 100%</span>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     CLASSROOM
-══════════════════════════════════ -->
+<!-- CLASSROOM -->
 <div id="classroom">
-
-  <!-- Top Bar -->
   <div id="topbar">
-    <div class="topbar-brand">🕌 المسجد الافتراضي</div>
-    <div class="topbar-info">
-      <span id="topbar-name" class="badge">—</span>
-      <span id="topbar-room" style="color:rgba(240,230,208,0.4); font-size:0.8rem;">—</span>
+    <div class="topbar-brand">🕌 <span id="tb-brand">المسجد الافتراضي</span></div>
+    <div class="topbar-center">
+      <div class="live-dot"></div>
+      <span class="badge" id="tb-name">—</span>
+      <span style="color:rgba(240,230,208,0.38);font-size:0.76rem" id="tb-room">—</span>
     </div>
-    <button class="btn-leave" onclick="leaveClassroom()">مغادرة ✕</button>
+    <button class="btn-leave" id="btn-leave" onclick="leave()">مغادرة ✕</button>
   </div>
 
-  <!-- Main -->
+  <div id="invite-bar">
+    <span id="inv-lbl">🔗 رابط الطلاب:</span>
+    <div id="invite-link-box">—</div>
+    <button class="inv-btn" id="inv-copy" onclick="copyInvite()">📋 نسخ الرابط</button>
+    <button class="inv-btn wa-btn" id="inv-wa" onclick="shareWA()">📱 واتساب</button>
+  </div>
+
   <div id="main-area">
+    <div id="vr-wrap">
+      <a-scene id="scene" embedded
+        renderer="antialias:false;colorManagement:false;physicallyCorrectLights:false;maxCanvasWidth:1280;maxCanvasHeight:720"
+        vr-mode-ui="enabled:false"
+        loading-screen="dotsColor:#C9A84C;backgroundColor:#0D1B2A">
 
-    <!-- VR Scene -->
-    <div id="vr-container">
+        <a-sky color="#08121e"></a-sky>
+        <a-light type="ambient" color="#3a4a3a" intensity="0.9"></a-light>
+        <a-light type="directional" color="#C9A84C" intensity="0.6" position="0 8 -3"></a-light>
+        <a-light type="point" color="#FFD080" intensity="1.1" position="0 6 0" distance="18"></a-light>
+        <a-light type="point" color="#FFD080" intensity="0.4" position="7 4 0"  distance="10"></a-light>
+        <a-light type="point" color="#FFD080" intensity="0.4" position="-7 4 0" distance="10"></a-light>
 
-      <a-scene
-        id="vr-scene"
-        embedded
-        renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
-        fog="type: exponential; color: #1a2a1a; density: 0.015"
-        loading-screen="dotsColor: #C9A84C; backgroundColor: #0D1B2A">
+        <!-- Floor + Carpet -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="28" height="28" color="#D5CDB8" roughness="0.35"></a-plane>
+        <a-plane position="0 0.01 0"   rotation="-90 0 0" width="16" height="10" color="#7A1515" opacity="0.88"></a-plane>
+        <a-plane position="0 0.011 0"  rotation="-90 0 0" width="16.4" height="10.4" color="#C9A84C" opacity="0.3"></a-plane>
+        <a-plane position="0 0.012 -3" rotation="-90 0 0" width="16" height="0.04" color="#C9A84C" opacity="0.45"></a-plane>
+        <a-plane position="0 0.012 0"  rotation="-90 0 0" width="16" height="0.04" color="#C9A84C" opacity="0.45"></a-plane>
+        <a-plane position="0 0.012 3"  rotation="-90 0 0" width="16" height="0.04" color="#C9A84C" opacity="0.45"></a-plane>
 
-        <a-assets>
-          <!-- Sky texture (gradient) -->
-        </a-assets>
+        <!-- Walls + Ceiling -->
+        <a-box position="0 5 -13"  width="28" height="10" depth="0.3" color="#284228"></a-box>
+        <a-box position="0 5  13"  width="28" height="10" depth="0.3" color="#284228"></a-box>
+        <a-box position="-13 5 0"  width="0.3" height="10" depth="26" color="#284228"></a-box>
+        <a-box position=" 13 5 0"  width="0.3" height="10" depth="26" color="#284228"></a-box>
+        <a-plane position="0 10 0" rotation="90 0 0" width="28" height="28" color="#1A381A"></a-plane>
 
-        <!-- ─── SKY ─── -->
-        <a-sky color="#0D1B2A"></a-sky>
+        <!-- Dome -->
+        <a-sphere position="0 11 0" radius="5" segments-height="10" segments-width="16" color="#1B4332" side="back"></a-sphere>
+        <a-torus position="0 8 0" radius="3" radius-tubular="0.05" color="#C9A84C" opacity="0.5"></a-torus>
 
-        <!-- ─── AMBIENT + LIGHTS ─── -->
-        <a-light type="ambient" color="#2a3a2a" intensity="0.6"></a-light>
-        <a-light type="directional" color="#C9A84C" intensity="0.8"
-          position="0 10 -5" castShadow="true"></a-light>
-        <!-- Chandeliers warm glow -->
-        <a-light type="point" color="#FFD700" intensity="1.2" position="0 5 0" distance="20"></a-light>
-        <a-light type="point" color="#FFD700" intensity="0.6" position="8 4 0" distance="12"></a-light>
-        <a-light type="point" color="#FFD700" intensity="0.6" position="-8 4 0" distance="12"></a-light>
+        <!-- Chandelier -->
+        <a-cylinder position="0 9.2 0" height="1.8" radius="0.02" color="#A08040"></a-cylinder>
+        <a-torus position="0 7.8 0" radius="1.0" radius-tubular="0.04" color="#C9A84C" metalness="0.7"></a-torus>
+        <a-sphere position="1.0 7.7 0"  radius="0.07" color="#FFEE88"></a-sphere>
+        <a-sphere position="-1.0 7.7 0" radius="0.07" color="#FFEE88"></a-sphere>
+        <a-sphere position="0 7.7  1.0" radius="0.07" color="#FFEE88"></a-sphere>
+        <a-sphere position="0 7.7 -1.0" radius="0.07" color="#FFEE88"></a-sphere>
 
-        <!-- ─── FLOOR (marble pattern) ─── -->
-        <a-plane position="0 0 0" rotation="-90 0 0" width="30" height="30"
-          color="#E8E0D0" roughness="0.2" metalness="0.1"
-          shadow="receive: true">
-        </a-plane>
+        <!-- Pillars -->
+        <a-cylinder position=" 5 4  5" radius="0.35" height="8" color="#C0B090"></a-cylinder>
+        <a-cylinder position="-5 4  5" radius="0.35" height="8" color="#C0B090"></a-cylinder>
+        <a-cylinder position=" 5 4 -5" radius="0.35" height="8" color="#C0B090"></a-cylinder>
+        <a-cylinder position="-5 4 -5" radius="0.35" height="8" color="#C0B090"></a-cylinder>
+        <a-torus position=" 5 7.6  5" radius="0.38" radius-tubular="0.05" color="#C9A84C" rotation="90 0 0"></a-torus>
+        <a-torus position="-5 7.6  5" radius="0.38" radius-tubular="0.05" color="#C9A84C" rotation="90 0 0"></a-torus>
+        <a-torus position=" 5 7.6 -5" radius="0.38" radius-tubular="0.05" color="#C9A84C" rotation="90 0 0"></a-torus>
+        <a-torus position="-5 7.6 -5" radius="0.38" radius-tubular="0.05" color="#C9A84C" rotation="90 0 0"></a-torus>
 
-        <!-- Floor marble grid lines -->
-        <a-entity position="0 0.01 0" rotation="-90 0 0">
-          <a-plane width="30" height="0.05" color="#C9A84C" opacity="0.3" position="0 -3 0"></a-plane>
-          <a-plane width="30" height="0.05" color="#C9A84C" opacity="0.3" position="0 0 0"></a-plane>
-          <a-plane width="30" height="0.05" color="#C9A84C" opacity="0.3" position="0 3 0"></a-plane>
-          <a-plane width="0.05" height="30" color="#C9A84C" opacity="0.3" position="-3 0 0"></a-plane>
-          <a-plane width="0.05" height="30" color="#C9A84C" opacity="0.3" position="0 0 0"></a-plane>
-          <a-plane width="0.05" height="30" color="#C9A84C" opacity="0.3" position="3 0 0"></a-plane>
+        <!-- Mihrab -->
+        <a-entity position="0 0 -12.8">
+          <a-box position="0 3 0" width="3" height="6" depth="0.4" color="#1B3A2A"></a-box>
+          <a-box position="0 2.8 0.02" width="2.4" height="5.2" depth="0.1" color="#245A3A"></a-box>
+          <a-torus position="0 5.2 0.22" radius="1.35" radius-tubular="0.11" color="#C9A84C" metalness="0.5" arc="180"></a-torus>
+          <a-box position="0 5.8 0.22" width="3.1" height="0.1" depth="0.15" color="#C9A84C"></a-box>
+          <a-box position="0 0.4 0.22" width="3.1" height="0.1" depth="0.15" color="#C9A84C"></a-box>
         </a-entity>
 
-        <!-- ─── WALLS ─── -->
-        <!-- Back wall -->
-        <a-box position="0 5 -14" width="30" height="10" depth="0.3"
-          color="#2D4A2D" roughness="0.8"></a-box>
-        <!-- Front wall -->
-        <a-box position="0 5 14" width="30" height="10" depth="0.3"
-          color="#2D4A2D" roughness="0.8"></a-box>
-        <!-- Left wall -->
-        <a-box position="-14 5 0" width="0.3" height="10" depth="28"
-          color="#2D4A2D" roughness="0.8"></a-box>
-        <!-- Right wall -->
-        <a-box position="14 5 0" width="0.3" height="10" depth="28"
-          color="#2D4A2D" roughness="0.8"></a-box>
-
-        <!-- ─── CEILING ─── -->
-        <a-plane position="0 10 0" rotation="90 0 0" width="30" height="30"
-          color="#1B3A1B" roughness="0.9"></a-plane>
-
-        <!-- ─── MAIN DOME ─── -->
-        <a-sphere position="0 11 0" radius="5" segments-height="18" segments-width="36"
-          color="#1B4332" roughness="0.7" metalness="0.1"
-          side="back"></a-sphere>
-
-        <!-- Dome inner glow ring -->
-        <a-torus position="0 8 0" radius="3" radius-tubular="0.05"
-          color="#C9A84C" opacity="0.6"
-          rotation="0 0 0"></a-torus>
-
-        <!-- ─── CHANDELIER ─── -->
-        <a-entity position="0 8.5 0">
-          <!-- Main ring -->
-          <a-torus radius="1.2" radius-tubular="0.04" color="#C9A84C" metalness="0.8"></a-torus>
-          <!-- Center drop -->
-          <a-cylinder position="0 0 0" height="0.8" radius="0.06"
-            color="#C9A84C" metalness="0.8"></a-cylinder>
-          <!-- Lights around ring -->
-          <a-sphere position="1.2 -0.1 0" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
-          <a-sphere position="-1.2 -0.1 0" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
-          <a-sphere position="0 -0.1 1.2" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
-          <a-sphere position="0 -0.1 -1.2" radius="0.08" color="#FFEE88" emission="#FFEE88"></a-sphere>
-          <!-- Hanging chains -->
-          <a-cylinder position="0 1.5 0" height="3" radius="0.01"
-            color="#A08040" metalness="0.9"></a-cylinder>
+        <!-- Minbar -->
+        <a-entity position="2.5 0 -11.5">
+          <a-box position="0 0.2  0.1"  width="1.1" height="0.4" depth="0.7" color="#8B7355"></a-box>
+          <a-box position="0 0.55 -0.2" width="1.1" height="0.4" depth="0.5" color="#7A6345"></a-box>
+          <a-box position="0 0.9  -0.4" width="1.1" height="0.4" depth="0.3" color="#6B5335"></a-box>
+          <a-box position="0 1.3  -0.5" width="1.2" height="0.1" depth="0.8" color="#C9A84C"></a-box>
+          <a-box position="0 2.1  -0.9" width="1.1" height="1.5" depth="0.1" color="#5A4525"></a-box>
         </a-entity>
 
-        <!-- ─── PILLARS (4 main pillars) ─── -->
-        <a-cylinder position="5 4 5"   radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
-        <a-cylinder position="-5 4 5"  radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
-        <a-cylinder position="5 4 -5"  radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
-        <a-cylinder position="-5 4 -5" radius="0.4" height="8" color="#C8B89A" roughness="0.6" shadow="cast:true;receive:true"></a-cylinder>
-
-        <!-- Pillar caps (gold bands) -->
-        <a-torus position="5 7.8 5"   radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
-        <a-torus position="-5 7.8 5"  radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
-        <a-torus position="5 7.8 -5"  radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
-        <a-torus position="-5 7.8 -5" radius="0.45" radius-tubular="0.06" color="#C9A84C" rotation="90 0 0"></a-torus>
-
-        <!-- ─── MIHRAB (prayer niche) ─── -->
-        <a-entity position="0 0 -13.5">
-          <!-- Arch back -->
-          <a-box position="0 3 0" width="3" height="6" depth="0.5"
-            color="#1B3A2A" roughness="0.7"></a-box>
-          <!-- Arch frame -->
-          <a-torus position="0 5 0.3" radius="1.4" radius-tubular="0.12"
-            color="#C9A84C" metalness="0.5"
-            rotation="0 0 0" arc="180"></a-torus>
-          <!-- Mihrab interior -->
-          <a-box position="0 3 -0.1" width="2.4" height="5" depth="0.2"
-            color="#2D5A3D" roughness="0.5"></a-box>
-          <!-- Gold decoration lines -->
-          <a-box position="0 5.5 0.35" width="3" height="0.08" depth="0.1" color="#C9A84C" metalness="0.7"></a-box>
-          <a-box position="0 0.5 0.35" width="3" height="0.08" depth="0.1" color="#C9A84C" metalness="0.7"></a-box>
+        <!-- Board 1: Qibla (left wall) -->
+        <a-entity position="-12.6 4 -4" rotation="0 90 0">
+          <a-box width="4" height="2.5" depth="0.1" color="#1B3A2A"></a-box>
+          <a-box width="4.14" height="2.64" depth="0.07" color="#C9A84C" position="0 0 -0.06"></a-box>
+          <a-text id="b1t1" value="اتجاه القبلة" align="center" color="#FFD700" width="3.5" position="0 0.6 0.08"></a-text>
+          <a-text id="b1t2" value="الكعبة المشرفة" align="center" color="#E8E0D0" width="3" position="0 -0.1 0.08"></a-text>
+          <a-text id="b1t3" value="زادها الله شرفاً" align="center" color="rgba(201,168,76,0.8)" width="2.8" position="0 -0.7 0.08"></a-text>
         </a-entity>
 
-        <!-- ─── MINBAR (pulpit) ─── -->
-        <a-entity position="2.5 0 -12">
-          <!-- Steps -->
-          <a-box position="0 0.2 0"   width="1.2" height="0.4" depth="0.8" color="#8B7355" roughness="0.8"></a-box>
-          <a-box position="0 0.6 -0.3" width="1.2" height="0.4" depth="0.6" color="#7A6545" roughness="0.8"></a-box>
-          <a-box position="0 1.0 -0.5" width="1.2" height="0.4" depth="0.4" color="#6B5535" roughness="0.8"></a-box>
-          <!-- Seat top -->
-          <a-box position="0 1.4 -0.6" width="1.3" height="0.12" depth="0.9" color="#C9A84C" metalness="0.3"></a-box>
-          <!-- Back rail -->
-          <a-box position="0 2.2 -1.0" width="1.2" height="1.6" depth="0.1" color="#5A4525"></a-box>
+        <!-- Board 2: Lesson (right wall) -->
+        <a-entity position="12.6 4 0" rotation="0 -90 0">
+          <a-box width="5" height="3" depth="0.1" color="#0D2B1A"></a-box>
+          <a-box width="5.14" height="3.14" depth="0.07" color="#C9A84C" position="0 0 -0.06"></a-box>
+          <a-text id="b2t1" value="درس اليوم" align="center" color="#FFD700" width="4" position="0 0.9 0.08"></a-text>
+          <a-text id="b2t2" value="سورة الفاتحة" align="center" color="#E8E0D0" width="4" position="0 0.2 0.08"></a-text>
+          <a-text id="b2t3" value="أحكام التجويد" align="center" color="#C9A84C" width="3.8" position="0 -0.45 0.08"></a-text>
+          <a-text id="b2teacher" value="" align="center" color="rgba(240,230,208,0.45)" width="3.5" position="0 -1.05 0.08"></a-text>
         </a-entity>
 
-        <!-- ─── PRAYER CARPETS ─── -->
-        <!-- Main carpet strip -->
-        <a-plane position="0 0.01 0" rotation="-90 0 0" width="18" height="8"
-          color="#8B1A1A" roughness="1.0" opacity="0.85"></a-plane>
-        <!-- Carpet border -->
-        <a-plane position="0 0.011 0" rotation="-90 0 0" width="18.3" height="8.3"
-          color="#C9A84C" roughness="1.0" opacity="0.4"></a-plane>
-
-        <!-- Prayer rows (carpet lines) -->
-        <a-plane position="0 0.012 -3" rotation="-90 0 0" width="18" height="0.05"
-          color="#C9A84C" opacity="0.5"></a-plane>
-        <a-plane position="0 0.012 0"  rotation="-90 0 0" width="18" height="0.05"
-          color="#C9A84C" opacity="0.5"></a-plane>
-        <a-plane position="0 0.012 3"  rotation="-90 0 0" width="18" height="0.05"
-          color="#C9A84C" opacity="0.5"></a-plane>
-
-        <!-- ─── TEACHING BOARDS (3 boards) ─── -->
-
-        <!-- Board 1: Qibla direction sign -->
-        <a-entity position="-12 4 -5">
-          <a-box width="4" height="2.5" depth="0.12" color="#1B3A2A" roughness="0.5"></a-box>
-          <a-box width="4.15" height="2.65" depth="0.08" color="#C9A84C" metalness="0.4" position="0 0 -0.05"></a-box>
-          <a-text value="اتجاه القبلة" align="center" color="#FFD700"
-            font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"
-            width="3.5" position="0 0.5 0.1"></a-text>
-          <a-text value="الكعبة المشرفة ←" align="center" color="#E8E0D0"
-            width="3" position="0 -0.1 0.1"></a-text>
-          <a-light type="point" color="#FFD700" intensity="0.5" position="0 1.5 1" distance="4"></a-light>
+        <!-- Board 3: Etiquette (back wall) -->
+        <a-entity position="0 4 12.8" rotation="0 180 0">
+          <a-box width="6" height="3.5" depth="0.1" color="#1B3A2A"></a-box>
+          <a-box width="6.14" height="3.64" depth="0.07" color="#C9A84C" position="0 0 -0.06"></a-box>
+          <a-text id="b3t1" value="آداب طالب القرآن" align="center" color="#FFD700" width="5" position="0 1.1 0.08"></a-text>
+          <a-text id="b3t2" value="الإنصات والاحترام" align="center" color="#E8E0D0" width="4.5" position="0 0.4 0.08"></a-text>
+          <a-text id="b3t3" value="الطهارة والوضوء" align="center" color="#E8E0D0" width="4.5" position="0 -0.2 0.08"></a-text>
+          <a-text id="b3t4" value="الإخلاص لله وحده" align="center" color="#E8E0D0" width="4.5" position="0 -0.8 0.08"></a-text>
         </a-entity>
 
-        <!-- Board 2: Today's lesson (right wall) -->
-        <a-entity position="12 4 0" rotation="0 -90 0">
-          <a-box width="5" height="3" depth="0.12" color="#0D2B1A" roughness="0.5"></a-box>
-          <a-box width="5.15" height="3.15" depth="0.08" color="#C9A84C" metalness="0.4" position="0 0 -0.05"></a-box>
-          <a-text value="درس اليوم" align="center" color="#FFD700"
-            width="4" position="0 0.9 0.1"></a-text>
-          <a-text value="سورة الفاتحة" align="center" color="#E8E0D0"
-            width="4" position="0 0.2 0.1"></a-text>
-          <a-text value="أحكام التجويد" align="center" color="#C9A84C"
-            width="3.5" position="0 -0.4 0.1"></a-text>
-          <a-text value="الاستاذ: —" align="center" color="rgba(240,230,208,0.6)"
-            width="3" position="0 -1.0 0.1" id="teacher-board-text"></a-text>
-        </a-entity>
+        <!-- Windows -->
+        <a-plane position="-12.78 5 -5" rotation="0 90 0"  width="1.8" height="2.5" color="#6AACCC" opacity="0.16"></a-plane>
+        <a-plane position="-12.78 5  5" rotation="0 90 0"  width="1.8" height="2.5" color="#6AACCC" opacity="0.16"></a-plane>
+        <a-plane position=" 12.78 5 -5" rotation="0 -90 0" width="1.8" height="2.5" color="#6AACCC" opacity="0.16"></a-plane>
+        <a-plane position=" 12.78 5  5" rotation="0 -90 0" width="1.8" height="2.5" color="#6AACCC" opacity="0.16"></a-plane>
 
-        <!-- Board 3: Rules board (back wall) -->
-        <a-entity position="0 4 13.5" rotation="0 180 0">
-          <a-box width="6" height="3.5" depth="0.12" color="#1B3A2A" roughness="0.5"></a-box>
-          <a-box width="6.15" height="3.65" depth="0.08" color="#C9A84C" metalness="0.4" position="0 0 -0.05"></a-box>
-          <a-text value="آداب طالب القرآن" align="center" color="#FFD700"
-            width="5" position="0 1.2 0.1"></a-text>
-          <a-text value="الإنصات والاحترام" align="center" color="#E8E0D0"
-            width="4.5" position="0 0.5 0.1"></a-text>
-          <a-text value="الطهارة والوضوء" align="center" color="#E8E0D0"
-            width="4.5" position="0 -0.1 0.1"></a-text>
-          <a-text value="الإخلاص لله تعالى" align="center" color="#E8E0D0"
-            width="4.5" position="0 -0.7 0.1"></a-text>
+        <!-- Camera / Player -->
+        <a-entity id="player" position="0 1.6 6"
+          wasd-controls="acceleration:12"
+          look-controls="pointerLockEnabled:false">
+          <a-camera fov="70" near="0.1" far="200"></a-camera>
         </a-entity>
-
-        <!-- ─── WINDOWS (arched) ─── -->
-        <!-- Left wall windows -->
-        <a-entity position="-13.8 5 -6">
-          <a-box width="0.2" height="3" depth="1.5" color="#1B3A1B" roughness="0.8"></a-box>
-          <a-plane rotation="0 90 0" width="1.5" height="2.5" color="#87CEEB" opacity="0.2" position="0.12 0 0"></a-plane>
-          <a-light type="point" color="#87CEEB" intensity="0.3" position="0.5 0 0" distance="5"></a-light>
-        </a-entity>
-        <a-entity position="-13.8 5 6">
-          <a-box width="0.2" height="3" depth="1.5" color="#1B3A1B" roughness="0.8"></a-box>
-          <a-plane rotation="0 90 0" width="1.5" height="2.5" color="#87CEEB" opacity="0.2" position="0.12 0 0"></a-plane>
-        </a-entity>
-
-        <!-- ─── CAMERA + PLAYER ─── -->
-        <a-entity id="player"
-          position="0 1.6 5"
-          wasd-controls="acceleration: 15"
-          look-controls="pointerLockEnabled: false">
-          <a-camera
-            near="0.1" far="500"
-            fov="70">
-          </a-camera>
-        </a-entity>
-
       </a-scene>
 
-      <!-- VR Controls bar -->
-      <div id="vr-controls">
-        <button class="ctrl-btn" onclick="moveToMihrab()">🕌 الاقتراب من المحراب</button>
-        <button class="ctrl-btn" onclick="moveToCenter()">↩ العودة للمنتصف</button>
-        <button class="ctrl-btn" onclick="toggleFullVR()">⛶ ملء الشاشة</button>
+      <div id="vr-ctrl">
+        <button class="cb" onclick="go(0,1.6,-8,180)">🕌 <span id="cb-mihrab">المحراب</span></button>
+        <button class="cb" onclick="go(0,1.6,6,180)">↩ <span id="cb-center">المنتصف</span></button>
+        <button class="cb" onclick="go(2.5,1.6,-10,150)">📖 <span id="cb-minbar">المنبر</span></button>
+        <button class="cb" onclick="fullVR()">⛶ <span id="cb-full">ملء الشاشة</span></button>
       </div>
-
-      <!-- Teacher panel -->
-      <div id="teacher-panel">
-        <h4>🎓 لوحة المعلم</h4>
-        <ul>
-          <li>W A S D للتحرك</li>
-          <li>الفأرة للنظر</li>
-          <li>اضغط F للملء</li>
-        </ul>
-      </div>
-
-    </div><!-- /vr-container -->
-
-    <!-- Video Sidebar (Jitsi) -->
-    <div id="video-sidebar">
-      <div class="sidebar-title">🎙️ الاتصال المباشر</div>
-      <iframe id="jitsi-frame" allow="camera; microphone; fullscreen; display-capture"></iframe>
+      <button id="perf-btn" onclick="togglePerf()">⚡ <span id="perf-lbl">وضع الأداء</span></button>
     </div>
 
-  </div><!-- /main-area -->
+    <!-- Video Panel -->
+    <div id="vid-panel">
+      <div class="vid-header">
+        <div class="live-dot"></div>
+        <span id="vid-hdr">الاتصال المباشر</span>
+      </div>
+      <div id="no-link-notice">
+        <div class="nl-icon">🎥</div>
+        <p id="nl-txt"><b>لم يُضف المعلم رابط اجتماع بعد.</b><br><br>سيظهر زر الانضمام هنا عند دخول المعلم.</p>
+      </div>
+      <div id="meet-btn-area" style="display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:1.5rem;gap:1rem">
+        <div style="font-size:2.5rem">🎥</div>
+        <p id="meet-ready-txt" style="font-size:0.85rem;color:rgba(240,230,208,0.7);text-align:center;line-height:1.7">الاجتماع جاهز!<br>اضغط للانضمام في نافذة جديدة</p>
+        <button id="open-meet-btn" onclick="openMeet()" style="background:linear-gradient(135deg,#1B4332,#2D6A4F);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:0.8rem 1.5rem;color:var(--gold);font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s">
+          📹 انضم للاجتماع
+        </button>
+        <p style="font-size:0.73rem;color:rgba(240,230,208,0.35);text-align:center">تفتح في نافذة منفصلة<br>يمكنك وضعها جانب المسجد</p>
+      </div>
+      <div class="vid-tip" id="vid-tip">💡 رتّب النوافذ: المسجد + الاجتماع جنباً إلى جنب</div>
+    </div>
+  </div>
+</div>
 
-  <button id="toggle-video-btn" onclick="toggleVideoPanel()">🎥 الفيديو</button>
-
-</div><!-- /classroom -->
+<button id="mob-vid-btn" onclick="document.getElementById('vid-panel').classList.toggle('show')">🎥 الفيديو</button>
 
 <script>
-// ══════════════════════════════════
-// STATE
-// ══════════════════════════════════
-let currentRole = 'student';
-let userName = '';
-let roomId = '';
+let lang='ar', role='student', userName='', roomId='', meetLink='', perf=false;
+window._inv='';
 
-// ══════════════════════════════════
-// LOBBY FUNCTIONS
-// ══════════════════════════════════
-function setRole(role, btn) {
-  currentRole = role;
-  document.querySelectorAll('.role-pill').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-function enterClassroom() {
-  userName = document.getElementById('user-name').value.trim();
-  roomId = document.getElementById('room-id').value.trim();
-
-  if (!userName) {
-    document.getElementById('user-name').focus();
-    document.getElementById('user-name').style.borderColor = '#ff6b6b';
-    return;
+const T={
+  ar:{
+    lTxt:'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ',lSub:'جاري تهيئة المسجد الافتراضي...',
+    pName:'منصة القرآن الكريم',pSub:'حصص تفاعلية في المسجد الافتراضي',
+    cardTitle:'⬤ الدخول للحصة',
+    lblName:'اسمك الكريم',phName:'أدخل اسمك...',errName:'يرجى إدخال اسمك',
+    lblRoom:'رقم الحصة',phRoom:'مثال: quran-01',errRoom:'يرجى إدخال رقم الحصة',
+    lblRole:'صفتك',rSt:'طالب',rTe:'معلم / شيخ',
+    tNote:'<b>للمعلم:</b> أنشئ اجتماع Google Meet أو Zoom وأدخل رابطه أدناه. سيتمكن الطلاب من الانضمام مباشرة من داخل المسجد الافتراضي.',
+    lblMeet:'رابط الاجتماع (Google Meet / Zoom...)',
+    btnEnter:'ادخل الحصة ←',
+    c1:'🕌 مسجد ثلاثي الأبعاد',c2:'🎙️ صوت مكاني',c3:'📋 لوحات تعليمية',c4:'مجاني 100%',
+    tbBrand:'المسجد الافتراضي',btnLeave:'مغادرة ✕',
+    invLbl:'🔗 رابط الطلاب:',invCopy:'📋 نسخ الرابط',invWa:'📱 واتساب',
+    vidHdr:'الاتصال المباشر',
+    nlTxt:'<b>لم يُضف المعلم رابط اجتماع بعد.</b><br><br>سيظهر الفيديو هنا عند دخول المعلم ووضع رابط الاجتماع.',
+    vidTip:'💡 إذا كان الفيديو بطيئاً — اخفض الجودة من إعدادات الاجتماع',
+    cbMihrab:'المحراب',cbCenter:'المنتصف',cbMinbar:'المنبر',cbFull:'ملء الشاشة',perfLbl:'وضع الأداء',
+    leaveQ:'هل تريد مغادرة الحصة؟',roomLbl:'غرفة: ',
+    waMsg:'السلام عليكم، تفضل بالدخول لحصة القرآن الكريم 🕌\n',
+    copied:'✓ تم النسخ!',
+    b1t1:'اتجاه القبلة',b1t2:'الكعبة المشرفة',b1t3:'زادها الله شرفاً',
+    b2t1:'درس اليوم',b2t2:'سورة الفاتحة',b2t3:'أحكام التجويد',
+    b3t1:'آداب طالب القرآن',b3t2:'الإنصات والاحترام',b3t3:'الطهارة والوضوء',b3t4:'الإخلاص لله وحده',
+  },
+  en:{
+    lTxt:'Bismillah Al-Rahman Al-Raheem',lSub:'Loading the virtual mosque...',
+    pName:'Quran Learning Platform',pSub:'Interactive lessons in the virtual mosque',
+    cardTitle:'⬤ Enter the Lesson',
+    lblName:'Your Name',phName:'Enter your name...',errName:'Please enter your name',
+    lblRoom:'Room / Lesson ID',phRoom:'e.g. quran-01',errRoom:'Please enter a room ID',
+    lblRole:'Your Role',rSt:'Student',rTe:'Teacher / Sheikh',
+    tNote:'<b>Teacher:</b> Create a Google Meet or Zoom session and paste the link below. Students will join directly inside the virtual mosque.',
+    lblMeet:'Meeting Link (Google Meet / Zoom...)',
+    btnEnter:'Enter Lesson →',
+    c1:'🕌 3D Mosque',c2:'🎙️ Spatial Audio',c3:'📋 Teaching Boards',c4:'100% Free',
+    tbBrand:'Virtual Mosque',btnLeave:'Leave ✕',
+    invLbl:'🔗 Student Link:',invCopy:'📋 Copy Link',invWa:'📱 WhatsApp',
+    vidHdr:'Live Video',
+    nlTxt:'<b>The teacher has not added a meeting link yet.</b><br><br>Video will appear here once the teacher sets up the meeting.',
+    vidTip:'💡 If video is slow — lower quality in the meeting settings',
+    cbMihrab:'Mihrab',cbCenter:'Center',cbMinbar:'Minbar',cbFull:'Fullscreen',perfLbl:'Perf Mode',
+    leaveQ:'Do you want to leave the lesson?',roomLbl:'Room: ',
+    waMsg:'Assalamu Alaikum, join the Quran class 🕌\n',
+    copied:'✓ Copied!',
+    b1t1:'Qibla Direction',b1t2:'Al-Kaaba Al-Musharafa',b1t3:'May Allah honor it',
+    b2t1:"Today's Lesson",b2t2:'Surah Al-Fatiha',b2t3:'Tajweed Rules',
+    b3t1:'Etiquette of the Student',b3t2:'Listen & Respect',b3t3:'Purity & Wudu',b3t4:'Sincerity for Allah',
   }
-  if (!roomId) {
-    document.getElementById('room-id').focus();
-    document.getElementById('room-id').style.borderColor = '#ff6b6b';
-    return;
-  }
+};
 
-  // Show loading
-  document.getElementById('loading-overlay').style.display = 'flex';
-  document.getElementById('loading-overlay').style.opacity = '1';
-
-  // Simulate loading + switch to classroom
-  setTimeout(() => {
-    document.getElementById('loading-overlay').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('loading-overlay').style.display = 'none';
-      document.getElementById('lobby').style.display = 'none';
-      document.getElementById('classroom').style.display = 'flex';
-
-      // Update topbar
-      document.getElementById('topbar-name').textContent =
-        (currentRole === 'teacher' ? '📖 ' : '🎓 ') + userName;
-      document.getElementById('topbar-room').textContent = 'غرفة: ' + roomId;
-
-      // Show teacher panel
-      if (currentRole === 'teacher') {
-        document.getElementById('teacher-panel').style.display = 'block';
-        document.getElementById('teacher-board-text').setAttribute('value', 'الأستاذ: ' + userName);
-      }
-
-      // Load Jitsi
-      loadJitsi();
-
-    }, 600);
-  }, 3000);
+function applyLang(){
+  const t=T[lang];
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'ع';
+  document.getElementById('l-txt').textContent=t.lTxt;
+  document.getElementById('l-sub').textContent=t.lSub;
+  document.getElementById('p-name').textContent=t.pName;
+  document.getElementById('p-sub').textContent=t.pSub;
+  document.getElementById('card-title').textContent=t.cardTitle;
+  document.getElementById('lbl-name').textContent=t.lblName;
+  document.getElementById('inp-name').placeholder=t.phName;
+  document.getElementById('err-name').textContent=t.errName;
+  document.getElementById('lbl-room').textContent=t.lblRoom;
+  document.getElementById('inp-room').placeholder=t.phRoom;
+  document.getElementById('err-room').textContent=t.errRoom;
+  document.getElementById('lbl-role').textContent=t.lblRole;
+  document.getElementById('r-student').textContent=t.rSt;
+  document.getElementById('r-teacher').textContent=t.rTe;
+  document.getElementById('teacher-note').innerHTML=t.tNote;
+  document.getElementById('lbl-meet').textContent=t.lblMeet;
+  document.getElementById('btn-enter').textContent=t.btnEnter;
+  document.getElementById('chip1').textContent=t.c1;
+  document.getElementById('chip2').textContent=t.c2;
+  document.getElementById('chip3').textContent=t.c3;
+  document.getElementById('chip4').textContent=t.c4;
+  document.getElementById('tb-brand').textContent=t.tbBrand;
+  document.getElementById('btn-leave').textContent=t.btnLeave;
+  document.getElementById('inv-lbl').textContent=t.invLbl;
+  document.getElementById('inv-copy').textContent=t.invCopy;
+  document.getElementById('inv-wa').textContent=t.invWa;
+  document.getElementById('vid-hdr').textContent=t.vidHdr;
+  document.getElementById('nl-txt').innerHTML=t.nlTxt;
+  document.getElementById('vid-tip').textContent=t.vidTip;
+  document.getElementById('cb-mihrab').textContent=t.cbMihrab;
+  document.getElementById('cb-center').textContent=t.cbCenter;
+  document.getElementById('cb-minbar').textContent=t.cbMinbar;
+  document.getElementById('cb-full').textContent=t.cbFull;
+  document.getElementById('perf-lbl').textContent=t.perfLbl;
+  // Boards
+  ['b1t1','b1t2','b1t3','b2t1','b2t2','b2t3','b3t1','b3t2','b3t3','b3t4'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.setAttribute('value',t[id]);
+  });
 }
+function toggleLang(){ lang=lang==='ar'?'en':'ar'; applyLang(); }
 
-function loadJitsi() {
-  // Clean room ID for Jitsi (no spaces)
-  const jitsiRoom = 'quran-' + roomId.replace(/[^a-zA-Z0-9-]/g, '-');
-  const displayName = encodeURIComponent(userName);
-
-  // Build Jitsi URL with config
-  const jitsiUrl = `https://meet.jit.si/${jitsiRoom}`
-    + `#userInfo.displayName="${displayName}"`
-    + `&config.startWithVideoMuted=false`
-    + `&config.startWithAudioMuted=false`
-    + `&config.prejoinPageEnabled=false`
-    + `&config.disableDeepLinking=true`
-    + `&interfaceConfig.SHOW_JITSI_WATERMARK=false`
-    + `&interfaceConfig.SHOW_BRAND_WATERMARK=false`
-    + `&interfaceConfig.DEFAULT_REMOTE_DISPLAY_NAME="${displayName}"`;
-
-  document.getElementById('jitsi-frame').src = jitsiUrl;
-}
-
-function leaveClassroom() {
-  if (confirm('هل تريد مغادرة الحصة؟')) {
-    document.getElementById('jitsi-frame').src = '';
-    document.getElementById('classroom').style.display = 'none';
-    document.getElementById('lobby').style.display = 'flex';
-    // Reset form
-    document.getElementById('user-name').style.borderColor = '';
-    document.getElementById('room-id').style.borderColor = '';
-  }
-}
-
-// ══════════════════════════════════
-// VR CONTROLS
-// ══════════════════════════════════
-function moveToMihrab() {
-  const player = document.getElementById('player');
-  player.setAttribute('position', '0 1.6 -8');
-  player.setAttribute('rotation', '0 180 0');
-}
-
-function moveToCenter() {
-  const player = document.getElementById('player');
-  player.setAttribute('position', '0 1.6 5');
-  player.setAttribute('rotation', '0 180 0');
-}
-
-function toggleFullVR() {
-  const vrContainer = document.getElementById('vr-container');
-  if (!document.fullscreenElement) {
-    vrContainer.requestFullscreen().catch(() => {});
-  } else {
-    document.exitFullscreen();
-  }
-}
-
-function toggleVideoPanel() {
-  document.getElementById('video-sidebar').classList.toggle('show');
-}
-
-// ══════════════════════════════════
-// INIT
-// ══════════════════════════════════
-window.addEventListener('load', () => {
-  // Hide loading after fonts load
-  setTimeout(() => {
-    document.getElementById('loading-overlay').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('loading-overlay').style.display = 'none';
-    }, 800);
-  }, 2000);
+window.addEventListener('DOMContentLoaded',()=>{
+  const p=new URLSearchParams(window.location.search);
+  if(p.get('room')) document.getElementById('inp-room').value=p.get('room');
+  if(p.get('meet')) document.getElementById('inp-meet').value=decodeURIComponent(p.get('meet')||'');
+  if(p.get('lang')==='en') lang='en';
+  applyLang();
+  setTimeout(()=>{
+    document.getElementById('loader').style.opacity='0';
+    setTimeout(()=>document.getElementById('loader').style.display='none',800);
+  },2000);
 });
-</script>
 
+function setRole(r,btn){
+  role=r;
+  document.querySelectorAll('.role-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('teacher-fields').style.display=r==='teacher'?'block':'none';
+}
+
+function enter(){
+  userName=document.getElementById('inp-name').value.trim();
+  const raw=document.getElementById('inp-room').value.trim();
+  meetLink=document.getElementById('inp-meet').value.trim();
+  let ok=true;
+  if(!userName){document.getElementById('inp-name').classList.add('err');document.getElementById('err-name').style.display='block';ok=false;}
+  else{document.getElementById('inp-name').classList.remove('err');document.getElementById('err-name').style.display='none';}
+  if(!raw){document.getElementById('inp-room').classList.add('err');document.getElementById('err-room').style.display='block';ok=false;}
+  else{document.getElementById('inp-room').classList.remove('err');document.getElementById('err-room').style.display='none';}
+  if(!ok) return;
+  roomId=raw.replace(/[^a-zA-Z0-9\u0600-\u06FF_-]/g,'-');
+  const ov=document.getElementById('loader');
+  ov.style.display='flex';ov.style.opacity='1';
+  setTimeout(()=>{ov.style.opacity='0';setTimeout(()=>{ov.style.display='none';showClassroom();},600);},2400);
+}
+
+function showClassroom(){
+  document.getElementById('lobby').style.display='none';
+  document.getElementById('classroom').style.display='flex';
+  const t=T[lang];
+  document.getElementById('tb-name').textContent=(role==='teacher'?'📖 ':'🎓 ')+userName;
+  document.getElementById('tb-room').textContent=t.roomLbl+roomId;
+  // Build invite link
+  const base=window.location.origin+window.location.pathname;
+  window._inv=base+'?room='+encodeURIComponent(roomId)+(meetLink?'&meet='+encodeURIComponent(meetLink):'')+(lang==='en'?'&lang=en':'');
+  document.getElementById('invite-link-box').textContent=window._inv;
+  if(role==='teacher') document.getElementById('b2teacher').setAttribute('value',(lang==='ar'?'الأستاذ: ':'Teacher: ')+userName);
+  if(meetLink){
+    document.getElementById('no-link-notice').style.display='none';
+    document.getElementById('meet-btn-area').style.display='flex';
+  }
+  history.replaceState(null,'',window.location.pathname+'?room='+encodeURIComponent(roomId)+(meetLink?'&meet='+encodeURIComponent(meetLink):''));
+}
+
+function copyInvite(){
+  navigator.clipboard.writeText(window._inv||'').then(()=>{
+    const btn=document.getElementById('inv-copy');
+    btn.classList.add('copied');
+    btn.textContent=T[lang].copied;
+    setTimeout(()=>{btn.classList.remove('copied');btn.textContent=T[lang].invCopy;},2500);
+  });
+}
+
+function shareWA(){
+  const msg=T[lang].waMsg+(window._inv||'');
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function go(x,y,z,ry){
+  const p=document.getElementById('player');
+  p.setAttribute('position',`${x} ${y} ${z}`);
+  if(ry!=null) p.setAttribute('rotation',`0 ${ry} 0`);
+}
+function fullVR(){
+  const c=document.getElementById('vr-wrap');
+  if(!document.fullscreenElement) c.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen();
+}
+function togglePerf(){
+  perf=!perf;
+  document.getElementById('scene').setAttribute('renderer',
+    perf?'antialias:false;colorManagement:false;physicallyCorrectLights:false;maxCanvasWidth:960;maxCanvasHeight:540'
+       :'antialias:false;colorManagement:false;physicallyCorrectLights:false;maxCanvasWidth:1280;maxCanvasHeight:720');
+  const btn=document.getElementById('perf-btn');
+  btn.style.borderColor=perf?'var(--ok)':'';
+  btn.style.color=perf?'var(--ok)':'';
+}
+function openMeet(){
+  if(meetLink) window.open(meetLink,'quran-meet','width=800,height=600,left=100,top=100');
+}
+function leave(){
+  if(confirm(T[lang].leaveQ)){
+    document.getElementById('classroom').style.display='none';
+    document.getElementById('lobby').style.display='flex';
+    history.replaceState(null,'',window.location.pathname);
+  }
+}
+</script>
 </body>
 </html>
